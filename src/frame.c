@@ -20,7 +20,7 @@ frame* parseFrame(const unsigned char* buf, size_t size)
 
     size_t cursor = 14;
 
-    if (ret->type == 0x8100) // VLAN
+    if (ret->type == VLAN) // VLAN
     {
         ret-> vlan_tci = ntohs(*(uint16_t*)(buf + cursor));
         cursor += 2;
@@ -43,10 +43,33 @@ void printFrame (frame *f)
     }
 
     printf("dst [%02x:%02x:%02x:%02x:%02x:%02x] src[%02x:%02x:%02x:%02x:%02x:%02x] \
-        type[%02u] payloadSize[%lu]\n", 
+        type[", 
         f->dst[0],f->dst[1],f->dst[2],f->dst[3],f->dst[4],f->dst[5],
-        f->src[0],f->src[1],f->src[2],f->src[3],f->src[4],f->src[5],
-        f->type, f->payload_size);
+        f->src[0],f->src[1],f->src[2],f->src[3],f->src[4],f->src[5]);
 
+    switch (f->type)
+    {
+        case IPV4:
+            printf("IPV4");
+            break;
+        case IPV6:
+            printf("IPV6");
+            break;
+        case LLDP:
+            printf("LLDP");
+            break;
+        case ARP:
+            printf("ARP");
+            break;
+        case HOMEPLUG2:
+        case HOMEPLUG :
+            printf("HOMEPLUG");
+            break;
+        default:
+            printf("0x%04x", f->type);
+            break;
+    }
+
+    printf("] payloadSize[%lu]\n",f->payload_size);
     // TODO: implements VLAN print
 }

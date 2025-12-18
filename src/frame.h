@@ -7,6 +7,18 @@
 #include <arpa/inet.h>
 #include <string.h>
 
+enum EtherType
+{
+    IPV4        = 0x0800,
+    IPV6        = 0x86DD,
+    LLDP        = 0x88CC,
+    ARP         = 0x0806,
+    HOMEPLUG    = 0x88E1,
+    HOMEPLUG2   = 0x887b,
+
+    VLAN    = 0x8100, // not a type
+};
+
 typedef struct frame {
     unsigned char dst[6];
     unsigned char src[6];
