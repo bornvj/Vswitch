@@ -42,7 +42,11 @@ void printFrame (frame *f)
         return;
     }
 
-    printf("dst [%02x:%02x:%02x:%02x:%02x:%02x] src[%02x:%02x:%02x:%02x:%02x:%02x]\n", 
+    printf("dst [%02x:%02x:%02x:%02x:%02x:%02x] src[%02x:%02x:%02x:%02x:%02x:%02x] \
+        type[%02u] payloadSize[%lu]\n", 
         f->dst[0],f->dst[1],f->dst[2],f->dst[3],f->dst[4],f->dst[5],
-        f->src[0],f->src[1],f->src[2],f->src[3],f->src[4],f->src[5]);
+        f->src[0],f->src[1],f->src[2],f->src[3],f->src[4],f->src[5],
+        f->type, f->payload_size);
+
+    // TODO: implements VLAN print
 }
