@@ -8,8 +8,6 @@
 
 #include "frame.h"
 
-
-#define BACKLOG 5
 #define BUFFERSIZE 1600
 
 int main(int argc, char *argv[]) 
@@ -21,7 +19,7 @@ int main(int argc, char *argv[])
     memset(&addr, 0, sizeof(addr));
     addr.sll_family =       AF_PACKET;
     addr.sll_protocol =     htons(ETH_P_ALL);
-    addr.sll_ifindex =      2;
+    addr.sll_ifindex =      1;
     bind(sock, (struct sockaddr *)&addr, sizeof(addr));
 
     unsigned char buf[BUFFERSIZE];

@@ -2,7 +2,7 @@ CC = gcc
 CFLAGS = -Wall -Wextra -O2 -g
 TARGET = switch
 
-SRC = src/main.c src/frame.c
+SRC = src/main.c src/frame.c src/record.c
 OBJ = $(SRC:.c=.o)
 
 all: $(TARGET)
