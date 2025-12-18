@@ -22,10 +22,18 @@ frame* parseFrame(const unsigned char* buf, size_t size)
 
     if (ret->type == VLAN) // VLAN
     {
-        ret-> vlan_tci = ntohs(*(uint16_t*)(buf + cursor));
+        uint16_t vlan_tci = ntohs(*(uint16_t*)(buf + cursor));
+        ret->vlan_priority  = vlan_tci >> 13 & 0b111;
+        ret->vlan_cfi       = vlan_tci >> 12 & 0b1;
+        ret->vlan_id        = vlan_tci >> 00 & 0b111111111111;
+
         cursor += 2;
         ret->type = ntohs(*(uint16_t*)(buf + cursor)); // get real type
         cursor += 2;
+    }
+    else
+    {
+        ret->vlan_id = 0;
     }
 
     ret->payload = buf + cursor;

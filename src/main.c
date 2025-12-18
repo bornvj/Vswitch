@@ -7,8 +7,10 @@
 #include <string.h>
 
 #include "frame.h"
+#include "record.h"
 
 #define BUFFERSIZE 1600
+#define INGRESS_IF 2
 
 int main(int argc, char *argv[]) 
 {
@@ -19,7 +21,7 @@ int main(int argc, char *argv[])
     memset(&addr, 0, sizeof(addr));
     addr.sll_family =       AF_PACKET;
     addr.sll_protocol =     htons(ETH_P_ALL);
-    addr.sll_ifindex =      1;
+    addr.sll_ifindex =      INGRESS_IF;
     bind(sock, (struct sockaddr *)&addr, sizeof(addr));
 
     unsigned char buf[BUFFERSIZE];
@@ -33,6 +35,19 @@ int main(int argc, char *argv[])
         frame *f = parseFrame(buf, len);
         printFrame(f);
 
+        mac_table_learn(f->src, f->vlan_id, INGRESS_IF);
+
+        record *rec = mac_table_lookup(f->dst, f->vlan_id);
+        
+        if (rec)
+        {
+            // deposer le colis
+        }
+        else
+        {
+            //flood le colis
+        }
+    
         free(f);
     }
     return 0;

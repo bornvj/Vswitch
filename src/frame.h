@@ -23,7 +23,9 @@ typedef struct frame {
     unsigned char dst[6];
     unsigned char src[6];
     uint16_t type;
-    uint16_t vlan_tci;
+    uint8_t vlan_priority;
+    uint8_t vlan_cfi;
+    uint16_t vlan_id;
     const unsigned char* payload;
     size_t payload_size;
 } frame;

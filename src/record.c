@@ -1,20 +1,7 @@
 #include "record.h"
 
-mac_table* initMacTable(size_t capacity)
-{
-    mac_table *ret = malloc(sizeof(mac_table));
-    if (!ret)
-        return NULL;
-
-    ret->records = calloc(capacity, sizeof(record*));;
-    if (!ret->records)
-        return NULL;
-
-    ret->capacity = capacity;
-    ret->count = 0;
-
-    return ret;
-}
+record *records[RECORDS_SIZE] = {0};
+size_t records_number = 0;
 
 record* initRec(const unsigned char MAC[6], uint16_t VLAN, int INTERFACE)
 {
@@ -30,55 +17,91 @@ record* initRec(const unsigned char MAC[6], uint16_t VLAN, int INTERFACE)
     return rec;
 }
     
-record *mac_table_lookup(mac_table *mac_table, const unsigned char MAC[6], uint16_t VLAN)
+record *mac_table_lookup(const unsigned char MAC[6], uint16_t VLAN_ID)
 {
-    if (!mac_table)
-        return NULL;
-
-    for (size_t i = 0; i < mac_table->capacity; i++)
-        if (mac_table->records[i] && 
-            memcmp(MAC, (mac_table->records[i])->MAC, 6 * sizeof(unsigned char)) == 0 
-            && VLAN == (mac_table->records[i])->VLAN)
-            return mac_table->records[i];
+    for (size_t i = 0; i < RECORDS_SIZE; i++)
+        if (records[i] && 
+            memcmp(MAC, records[i]->MAC, 6) == 0 
+            && VLAN_ID == (records[i])->VLAN)
+            return records[i];
 
     return NULL;
 }
 
-void mac_table_learn(mac_table *mac_table, const unsigned char MAC[6], uint16_t VLAN, int INTERFACE);
-
-void mac_table_age(mac_table *mac_table, time_t now)
+void mac_table_learn(const unsigned char MAC[6], uint16_t VLAN_ID, int INTERFACE)
 {
-    if (!mac_table)
+    size_t cursor = 0;
+
+    while (records[cursor] && cursor < RECORDS_SIZE)
+    {
+        if (memcmp(MAC, records[cursor]->MAC, 6) == 0 && 
+            records[cursor]->VLAN == VLAN_ID)
+        {
+            if (records[cursor]->INTERFACE != INTERFACE)
+            {
+                records[cursor]->INTERFACE = INTERFACE;
+            }
+            records[cursor]->last_seen = time(NULL);
+            return;
+        }
+        cursor++;
+    }
+
+    record *rec = initRec(MAC, VLAN_ID, INTERFACE);
+    if (!rec)
         return;
 
-    for (size_t i = 0; i < mac_table->capacity; i++)
+    cursor = 0;
+    if (records_number == RECORDS_SIZE)
     {
-        if (mac_table->records[i])
+        size_t oldest_pos = 0;
+        time_t oldest_time = 0;
+
+        while (cursor != RECORDS_SIZE)
         {
-            unsigned long diff = (unsigned long) difftime(now, mac_table->records[i]->last_seen);
+            if (records[cursor]->last_seen > oldest_time)
+            {
+                oldest_pos = oldest_pos;
+                oldest_time = records[cursor]->last_seen;
+            }
+            cursor++;
+        }
+        free(records[oldest_pos]);
+    }
+    else
+    {
+        while (records[cursor]) {cursor++;}
+        records_number++;
+    }
+    records[cursor] = rec;
+}
+
+void mac_table_age(time_t now)
+{
+    for (size_t i = 0; i < RECORDS_SIZE; i++)
+    {
+        if (records[i])
+        {
+            unsigned long diff = (unsigned long) difftime(now, records[i]->last_seen);
             if (diff >= MAX_DELAY)
             {
-                free(mac_table->records[i]);
-                mac_table->records[i] = NULL;
+                free(records[i]);
+                records[i] = NULL;
+
+                records_number--;
             }
         }
     }
 }
 
-void mac_table_free(mac_table *mac_table)
+void mac_table_free()
 {
-    if (!mac_table)
-        return;
-
-    for (size_t i = 0; i < mac_table->capacity; i++)
+    for (size_t i = 0; i < RECORDS_SIZE; i++)
     {
-        if (mac_table->records[i])
+        if (records[i])
         {
-            free(mac_table->records[i]);
-            mac_table->records[i] = NULL;
+            free(records[i]);
+            records[i] = NULL;
         }
     }
-
-    free(mac_table->records);
-    free(mac_table);
 }

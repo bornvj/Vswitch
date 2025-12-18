@@ -8,6 +8,7 @@
 #include <malloc.h>
 #include <string.h>
 
+#define RECORDS_SIZE 1024
 #define MAX_DELAY 600
 
 typedef struct record
@@ -18,20 +19,14 @@ typedef struct record
     time_t last_seen;
 } record;
 
-typedef struct mac_table 
-{
-    record **records;
-    size_t capacity;
-    size_t count;
-} mac_table;
-
-mac_table* initMacTable(size_t capacity);
+extern record *records[RECORDS_SIZE];
+extern size_t records_number;
 
 record* initRec(const unsigned char MAC[6], uint16_t VLAN, int INTERFACE);
 
-record *mac_table_lookup(mac_table *mac_table, const unsigned char MAC[6], uint16_t VLAN);
-void mac_table_learn(mac_table *mac_table, const unsigned char MAC[6], uint16_t VLAN, int INTERFACE);
-void mac_table_age(mac_table *mac_table, time_t now);
-void mac_table_free(mac_table *mac_table);
+record *mac_table_lookup(const unsigned char MAC[6], uint16_t VLAN_ID);
+void mac_table_learn(const unsigned char MAC[6], uint16_t VLAN_ID, int INTERFACE);
+void mac_table_age(time_t now);
+void mac_table_free(void);
 
 #endif
