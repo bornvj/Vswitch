@@ -19,7 +19,8 @@ enum EtherType
     VLAN    = 0x8100, // not a type
 };
 
-typedef struct frame {
+typedef struct frame 
+{
     unsigned char dst[6];
     unsigned char src[6];
     uint16_t type;

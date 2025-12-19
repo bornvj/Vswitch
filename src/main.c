@@ -79,6 +79,7 @@ int main(void)
                 continue;
 
             frame *f = parseFrame(buf, len);
+
             if (!f)
                 continue;
 
@@ -90,7 +91,7 @@ int main(void)
             {
                 int out = dst->INTERFACE;
 
-                sendto( ifaces[out].sock, buf, len, 0, (struct sockaddr *)&ifaces[out].addr,
+                sendto(ifaces[out].sock, buf, len, 0, (struct sockaddr *)&ifaces[out].addr,
                     sizeof(ifaces[out].addr));
             }
             else
@@ -106,7 +107,6 @@ int main(void)
             }
             free(f);
         }
-
         mac_table_age(time(NULL));
     }
 

@@ -3,7 +3,8 @@
 
 #include <arpa/inet.h>
 
-struct iface {
+struct iface 
+{
     int ifindex;
     int sock;
     struct sockaddr_ll addr;
