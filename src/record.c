@@ -1,7 +1,7 @@
 #include "tools.h"
 #include "record.h"
 
-extern bucket *mac_table[BUCKETS_SIZE] = {0};
+bucket *mac_table[BUCKETS_SIZE] = {0};
 
 bucket* bucket_init(record *rec)
 {

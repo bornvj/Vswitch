@@ -18,3 +18,6 @@ clean:
 
 run: $(TARGET)
 	./$(TARGET)
+
+doc:
+	doxygen Doxyfile

@@ -27,7 +27,7 @@ typedef struct bucket
 
 extern bucket *mac_table[BUCKETS_SIZE];
 
-bucket* bucket_init();
+bucket* bucket_init(record *rec);
 record* initRec(const unsigned char MAC[6], uint16_t VLAN, int INTERFACE);
 
 record *mac_table_lookup(const unsigned char MAC[6], uint16_t VLAN_ID);
