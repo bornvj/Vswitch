@@ -19,7 +19,7 @@ bucket* bucket_init(record *rec)
     return ret;
 }
 
-record* initRec(const unsigned char MAC[6], uint16_t VLAN, int INTERFACE)
+record* initRec(const unsigned char MAC[6], uint16_t VLAN, size_t INTERFACE)
 {
     record *rec = malloc(sizeof(record));
     if (!rec)
@@ -49,7 +49,7 @@ record *mac_table_lookup(const unsigned char MAC[6], uint16_t VLAN_ID)
     return NULL;
 }
 
-void mac_table_learn(const unsigned char MAC[6], uint16_t VLAN_ID, int INTERFACE)
+void mac_table_learn(const unsigned char MAC[6], uint16_t VLAN_ID, size_t INTERFACE)
 {
     uint8_t key = hash(MAC, VLAN_ID);
 

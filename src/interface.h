@@ -5,9 +5,10 @@
 
 struct iface 
 {
-    int ifindex;
+    size_t ifindex;
     int sock;
     struct sockaddr_ll addr;
+    char *ifname;
 };
 
 #endif
