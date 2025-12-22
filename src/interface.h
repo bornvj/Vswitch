@@ -2,6 +2,7 @@
 #define INTERFACE_H
 
 #include <arpa/inet.h>
+#include <linux/if_packet.h>
 
 struct iface 
 {

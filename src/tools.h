@@ -5,17 +5,10 @@
 #include <unistd.h>
 #include <string.h>
 
-uint8_t hash(const unsigned char MAC[6], uint16_t vlan)
-{
-    uint16_t ret = MAC[5] ^ MAC[4] ^ MAC[3] ^
-            MAC[2] ^ MAC[1] ^ MAC[0] ^ vlan;
+#include "interface.h"
 
-    return ret % UINT8_MAX;
-}
-
-int mac_equal(const unsigned char MAC1[6], const unsigned char MAC2[6])
-{
-    return !memcmp(MAC1, MAC2, 6);
-}
+uint8_t hash(const unsigned char MAC[6], uint16_t vlan);
+int mac_equal(const unsigned char MAC1[6], const unsigned char MAC2[6]);
+void print_mac_table(struct iface *ifaces, size_t iface_nbr);
 
 #endif

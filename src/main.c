@@ -16,6 +16,7 @@
 #include "interface.h"
 #include "frame.h"
 #include "record.h"
+#include "tools.h"
 
 #define BUFFERSIZE 1600
 #define MAX_IFACES 20
@@ -134,6 +135,7 @@ int main(void)
             free(f);
         }
         mac_table_age(time(NULL));
+        print_mac_table(ifaces, nbr_ifaces);
     }
 
     exit(EXIT_SUCCESS);

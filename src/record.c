@@ -1,5 +1,6 @@
-#include "tools.h"
+
 #include "record.h"
+#include "tools.h"
 
 bucket *mac_table[BUCKETS_SIZE] = {0};
 
