@@ -62,16 +62,21 @@ int main(void)
             exit(1);
         }
         
-        ifaces[nbr_ifaces].ifindex = addr.sll_ifindex;
-        ifaces[nbr_ifaces].sock    = sock;
-        ifaces[nbr_ifaces].addr    = addr;
-        ifaces[nbr_ifaces].ifname  = strdup(ifa->ifa_name);
+        ifaces[nbr_ifaces].ifindex      = addr.sll_ifindex;
+        ifaces[nbr_ifaces].sock         = sock;
+        ifaces[nbr_ifaces].addr         = addr;
+        ifaces[nbr_ifaces].ifname       = strdup(ifa->ifa_name);
+
+        ifaces[nbr_ifaces].rx_frames    = 0;
+        ifaces[nbr_ifaces].rx_bytes     = 0;
+        ifaces[nbr_ifaces].tx_frames    = 0;
+        ifaces[nbr_ifaces].tx_bytes     = 0;
 
         nbr_ifaces++;
     }
 
     freeifaddrs(ifaddr);
-
+    time_t start_time = time(NULL);
     unsigned char buf[BUFFERSIZE];
 
     while (1)
@@ -110,6 +115,9 @@ int main(void)
             if (!f)
                 continue;
 
+            ifaces[in].rx_frames += 1;
+            ifaces[in].rx_bytes += len;
+
             mac_table_learn(f->src, f->vlan_id, ifaces[in].ifindex);
 
             record *dst = mac_table_lookup(f->dst, f->vlan_id);
@@ -120,6 +128,9 @@ int main(void)
 
                 sendto(ifaces[out].sock, buf, len, 0, (struct sockaddr *)&ifaces[out].addr,
                     sizeof(ifaces[out].addr));
+
+                ifaces[out].tx_frames += 1;
+                ifaces[out].tx_bytes += len;
             }
             else
             {
@@ -130,12 +141,15 @@ int main(void)
 
                     sendto(ifaces[out].sock, buf, len, 0, (struct sockaddr *)&ifaces[out].addr,
                         sizeof(ifaces[out].addr));
+
+                    ifaces[out].tx_frames += 1;
+                    ifaces[out].tx_bytes += len;
                 }
             }
             free(f);
         }
         mac_table_age(time(NULL));
-        print_mac_table(ifaces, nbr_ifaces);
+        print_mac_table(ifaces, nbr_ifaces, start_time);
     }
 
     exit(EXIT_SUCCESS);
