@@ -6,7 +6,7 @@ Il apprend dynamiquement les adresses MAC, est VLAN-aware (802.1Q) et effectue l
     📡 Capture des trames Ethernet via AF_PACKET / SOCK_RAW
     🧠 MAC learning table avec aging
     🏷️ Support VLAN 802.1Q
-    🌊 Flooding VLAN-aware
+    🌊 Flooding VLAN-aw are
     🔁 Forwarding unicast
     📊 Statistiques RX / TX par interface (frames + bytes)
     ⏱️ Uptime et last_seen par entrée MAC
@@ -21,5 +21,5 @@ make
 
 ▶️ Run
 ```
-./switch
+sudo ./switch
 ```
