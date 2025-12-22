@@ -109,11 +109,11 @@ int main(void)
             if (!f)
                 continue;
 
-            mac_table_learn(f->src, f->vlan_id, in);
+            mac_table_learn(f->src, f->vlan_id, ifaces[in].ifindex);
 
             record *dst = mac_table_lookup(f->dst, f->vlan_id);
 
-            if (dst && dst->INTERFACE != in)
+            if (dst && dst->INTERFACE != ifaces[in].ifindex)
             {
                 int out = dst->INTERFACE;
 
@@ -124,7 +124,7 @@ int main(void)
             {
                 for (size_t out = 0; out < nbr_ifaces; out++)
                 {
-                    if (out == in)
+                    if (ifaces[out].ifindex == ifaces[in].ifindex)
                         continue;
 
                     sendto(ifaces[out].sock, buf, len, 0, (struct sockaddr *)&ifaces[out].addr,

@@ -28,7 +28,7 @@ frame* parseFrame(const unsigned char* buf, size_t size)
         ret->vlan_id        = vlan_tci >> 00 & 0b111111111111;
 
         cursor += 2;
-        ret->type = ntohs(*(uint16_t*)(buf + cursor)); // get real type
+        ret->type = ntohs(*(uint16_t*)(buf + cursor));
         cursor += 2;
     }
     else
