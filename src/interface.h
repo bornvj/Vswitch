@@ -1,6 +1,12 @@
 #ifndef INTERFACE_H
 #define INTERFACE_H
 
+/**
+ * @file interface.h
+ * @brief interface struct definition
+ */
+
+
 #include <arpa/inet.h>
 #include <linux/if_packet.h>
 

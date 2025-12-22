@@ -1,6 +1,12 @@
 #ifndef FRAME_H
 #define FRAME_H
 
+/**
+ * @file frame.h
+ * @brief define a frame
+ */
+
+
 #include <stdlib.h>
 #include <unistd.h>
 #include <stdint.h>
@@ -19,6 +25,10 @@ enum EtherType
     VLAN    = 0x8100, // not a type
 };
 
+
+/**
+ * @brief Contains information parsed from a IEEE ethernet frame
+ */
 typedef struct frame 
 {
     unsigned char dst[6];

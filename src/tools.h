@@ -1,6 +1,12 @@
 #ifndef TOOLS_H
 #define TOOLS_H
 
+/**
+ * @file tool.h
+ * @brief tools for a cleaner code
+ */
+
+
 #include <stdint.h>
 #include <unistd.h>
 #include <string.h>
