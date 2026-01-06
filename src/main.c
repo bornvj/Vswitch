@@ -185,12 +185,6 @@ int main(void)
                 
                 if (len >= 0 && len < BUFFERSIZE)
                     buf[len] = '\0';
-
-
-                printf("UNIX -> [");
-                for (ssize_t i = 0; i < len; i++)
-                    putchar(buf[i]);
-                printf("]\n");
                 
                 command *cmd = parseCommand(buf, len);
 

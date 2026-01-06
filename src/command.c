@@ -13,7 +13,6 @@ command *parseCommand(unsigned char *buf, size_t len)
     if (sscanf((char *)buf, "%31s %31s %31s", cmd, arg1, arg2) < 0)
         return NULL;
 
-    printf("cmd=%s, arg1=%s, arg2=%s\n", cmd, arg1, arg2);
     command *ret = malloc(sizeof(command));
     ret->type = ERROR;
     ret->ifname[0] = '\0';
@@ -62,6 +61,7 @@ void printCommand(command *cmd)
             printf("GET TRAFIC %s\n", cmd->ifname);
             break;
         default:
+            printf("ERROR COMAND\n");
             break;
     }
 }
