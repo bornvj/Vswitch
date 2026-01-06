@@ -1,4 +1,4 @@
-from flask import Flask, jsonify, render_template, send_from_directory
+from flask import Flask, jsonify, render_template, send_from_directory, Response
 import socket
 import json
 import os
@@ -42,9 +42,12 @@ def favicon():
 @app.route("/api/ifaces")
 def ifaces():
     raw = query_switch("GET IFACES")
-    # Convertit la chaîne JSON du C en objet Python
-    data = json.loads(raw)
-    return jsonify({"ifaces": data})
+    return Response(raw, mimetype="application/json")
+
+@app.route("/api/trafic/<ifname>")
+def iface_stats(ifname):
+    raw = query_switch(f"GET TRAFIC {ifname}")
+    return Response(raw, mimetype="application/json")
 
 if __name__ == "__main__":
     app.run(host="127.0.0.1", port=8080, debug=True)

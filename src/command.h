@@ -7,13 +7,27 @@
 enum command_type
 {
     ERROR,
-    GET_IFACES, //  GET IFACE           -> ["if1", "if2", ...]
-    GET_TRAFIC, //  GET TRAFIC IFACE    -> 
+    GET_IFACES,
+    /* GET IFACES
+    {
+        "ifaces:" ["if1", "if2", ...]
+    }        
+    */
+    GET_TRAFIC,
+    /* GET TRAFIC
+    {
+        "rx_frames": value,
+        "rx_bytes": value,
+        "tx_frames": value,
+        "tx_bytes": value
+    }
+    */
 };
 
 typedef struct command
 {
     enum command_type type;
+    char ifname[32];
 } command;
 
 command *parseCommand(unsigned char *buf, size_t len);

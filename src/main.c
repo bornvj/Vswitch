@@ -182,6 +182,11 @@ int main(void)
                 socklen_t addrlen = sizeof(src_addr);
 
                 ssize_t len = recvfrom(sockfd_un, buf, sizeof(buf), 0, (struct sockaddr *)&src_addr, &addrlen);
+                
+                if (len >= 0 && len < BUFFERSIZE)
+                    buf[len] = '\0';
+
+
                 printf("UNIX -> [");
                 for (ssize_t i = 0; i < len; i++)
                     putchar(buf[i]);
