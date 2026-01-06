@@ -1,5 +1,6 @@
 Layer 2 Ethernet switch implemented in userland under Linux, based on AF_PACKET sockets.
 It dynamically learns MAC addresses, is VLAN-aware (802.1Q), and performs forwarding/flooding like a traditional switch.
+Can be monitor through a web page.
 
 ✨ Features
 
