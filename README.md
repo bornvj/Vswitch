@@ -12,6 +12,9 @@ Il apprend dynamiquement les adresses MAC, est VLAN-aware (802.1Q) et effectue l
     ⏱️ Uptime et last_seen par entrée MAC
     🖥️ Affichage temps réel
 
+<img width="1048" height="532" alt="image" src="https://github.com/user-attachments/assets/4bebf4b2-b44e-4b1d-80a8-45166f927fdb" />
+Processes diagram and API
+
 🛠️ Install & Build
 ```
 git clone git@github.com:bornvj/Vswitch.git
@@ -23,3 +26,4 @@ make
 ```
 sudo ./switch
 ```
+
