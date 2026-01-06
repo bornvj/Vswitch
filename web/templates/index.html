@@ -1,5 +1,27 @@
 <!DOCTYPE html>
 <html>
+    <style>
+        body { background: #111; color: #0f0; font-family: monospace; }
+
+        .iface {
+            cursor: pointer;
+            padding: 5px;
+            border: 1px solid #0f0;
+            margin: 5px 0;
+        }
+
+        .iface:hover {
+            background: #022;
+        }
+
+        .details {
+            margin-left: 20px;
+            padding: 5px;
+            border-left: 2px solid #0f0;
+            display: none;
+        }
+    </style>
+
     <head>
         <meta charset="utf-8">
         <title>VSwitch Monitor</title>
@@ -9,10 +31,11 @@
         </style>
     </head>
     <body>
+        <h1>VSwitch status</h1>
+        <div id="ifaces">loading...</div>
 
-    <h1>VSwitch status</h1>
-    <pre id="output">loading...</pre>
-
-    <script src="/static/main.js"></script>
+        <script src="/static/main.js"></script>
     </body>
+
+    
 </html>

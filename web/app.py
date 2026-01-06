@@ -1,4 +1,4 @@
-from flask import Flask, jsonify, render_template
+from flask import Flask, jsonify, render_template, send_from_directory
 import socket
 import json
 import os
@@ -6,7 +6,7 @@ import os
 SOCK_PATH = "/run/vswitch.sock"
 DATAGRAM_MAX_SIZE = 65535
 
-app = Flask(__name__)
+app = Flask(__name__, static_folder='static')
 
 def query_switch(cmd: str) -> str:
     s = socket.socket(socket.AF_UNIX, socket.SOCK_DGRAM)
@@ -31,8 +31,16 @@ def query_switch(cmd: str) -> str:
 def index():
     return render_template("index.html")
 
+@app.route("/favicon.ico")
+def favicon():
+    return send_from_directory(
+        os.path.join(app.root_path, "static"),
+        "favicon.ico",
+        mimetype="image/vnd.microsoft.icon"
+    )
+
 @app.route("/api/ifaces")
-def stats():
+def ifaces():
     raw = query_switch("GET IFACES")
     # Convertit la chaîne JSON du C en objet Python
     data = json.loads(raw)
