@@ -52,7 +52,7 @@ void printCommand(command *cmd)
     }
 }
 
-void handleCommand(command *cmd, char* outputBuf)
+void handleCommand(command *cmd, char* outputBuf, switch_ctx ctx)
 {
     if (!cmd)
     {
@@ -63,7 +63,24 @@ void handleCommand(command *cmd, char* outputBuf)
     switch (cmd->type)
     {
         case GET_IFACES:
-            strcpy(outputBuf, "HANLDE");
+            outputBuf[0] = '\0';
+            strcat(outputBuf, "[");
+
+            if (ctx.nbr_ifaces >= 1)
+            {
+                strcat(outputBuf, "\"");
+                strcat(outputBuf, ctx.ifaces[0].ifname);
+                strcat(outputBuf, "\"");
+            }
+
+            for (size_t i = 1; i < ctx.nbr_ifaces; i++)
+            {
+                strcat(outputBuf, ",\"");
+                strcat(outputBuf, ctx.ifaces[i].ifname);
+                strcat(outputBuf, "\"");
+            }
+
+            strcat(outputBuf, "]");
             break;
     
         default:

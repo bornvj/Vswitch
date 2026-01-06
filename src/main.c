@@ -144,7 +144,9 @@ int main(void)
         }
 
         freeifaddrs(ifaddr);
-        time_t start_time = time(NULL);
+
+        ctx.start_time = time(NULL);
+
         unsigned char buf[BUFFERSIZE];
         char outputbuff[BUFFERSIZE];
 
@@ -194,9 +196,9 @@ int main(void)
 
 
                 memset(outputbuff, 0, sizeof(outputbuff));
-                handleCommand(cmd, outputbuff);
+                handleCommand(cmd, outputbuff, ctx);
 
-                sendto(sockfd_un, outputbuff, strlen(outputbuff) + 1, 0, (struct sockaddr *)&src_addr, addrlen);
+                sendto(sockfd_un, outputbuff, strlen(outputbuff), 0, (struct sockaddr *)&src_addr, addrlen);
             
                 free(cmd);
             }
@@ -257,7 +259,7 @@ int main(void)
             mac_table_age(time(NULL));
 
             // UNCOMMENT THIS LINE TO PRINT MAC TABLE
-            // print_mac_table(ifaces, nbr_ifaces, start_time);
+            // print_mac_table(ctx.ifaces, ctx.nbr_ifaces, ctx.start_time);
         }
 
         if (web_pid > 0)

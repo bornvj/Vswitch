@@ -1,5 +1,6 @@
 from flask import Flask, jsonify, render_template
 import socket
+import json
 import os
 
 SOCK_PATH = "/run/vswitch.sock"
@@ -33,7 +34,9 @@ def index():
 @app.route("/api/ifaces")
 def stats():
     raw = query_switch("GET IFACES")
-    return jsonify({"raw": raw})
+    # Convertit la chaîne JSON du C en objet Python
+    data = json.loads(raw)
+    return jsonify({"ifaces": data})
 
 if __name__ == "__main__":
     app.run(host="127.0.0.1", port=8080, debug=True)
