@@ -21,15 +21,17 @@
 #include "frame.h"
 #include "record.h"
 #include "tools.h"
+#include "command.h"
+
+#include "switch_ctx.h"
 
 volatile sig_atomic_t running = 1;
 pid_t web_pid = -1;
 
 
 #define BUFFERSIZE 1600
-#define MAX_IFACES 20
+#define OUTPUT_BUFFERSIZE 1600
 
-struct iface ifaces[MAX_IFACES];
 
 void handle_signal(int sig)
 {
@@ -54,6 +56,12 @@ int main(void)
     sigaction(SIGTERM, &sa, NULL);
 
     unlink("/run/vswitch.sock");
+
+    // Init the switch context
+    switch_ctx ctx;
+    memset(&ctx, 0, MAX_IFACES * sizeof(struct iface));
+    ctx.nbr_ifaces = 0;
+
     
     // split processes
     web_pid = fork();
@@ -95,8 +103,6 @@ int main(void)
             exit(EXIT_FAILURE);
         }
 
-        size_t nbr_ifaces = 0;
-
         for (struct ifaddrs *ifa = ifaddr; ifa != NULL; ifa = ifa->ifa_next) 
         {
             if (ifa->ifa_addr == NULL || ifa->ifa_addr->sa_family != AF_PACKET)
@@ -124,22 +130,23 @@ int main(void)
                 exit(1);
             }
             
-            ifaces[nbr_ifaces].ifindex      = addr.sll_ifindex;
-            ifaces[nbr_ifaces].sock         = sock;
-            ifaces[nbr_ifaces].addr         = addr;
-            ifaces[nbr_ifaces].ifname       = strdup(ifa->ifa_name);
+            ctx.ifaces[ctx.nbr_ifaces].ifindex      = addr.sll_ifindex;
+            ctx.ifaces[ctx.nbr_ifaces].sock         = sock;
+            ctx.ifaces[ctx.nbr_ifaces].addr         = addr;
+            ctx.ifaces[ctx.nbr_ifaces].ifname       = strdup(ifa->ifa_name);
 
-            ifaces[nbr_ifaces].rx_frames    = 0;
-            ifaces[nbr_ifaces].rx_bytes     = 0;
-            ifaces[nbr_ifaces].tx_frames    = 0;
-            ifaces[nbr_ifaces].tx_bytes     = 0;
+            ctx.ifaces[ctx.nbr_ifaces].rx_frames    = 0;
+            ctx.ifaces[ctx.nbr_ifaces].rx_bytes     = 0;
+            ctx.ifaces[ctx.nbr_ifaces].tx_frames    = 0;
+            ctx.ifaces[ctx.nbr_ifaces].tx_bytes     = 0;
 
-            nbr_ifaces++;
+            ctx.nbr_ifaces++;
         }
 
         freeifaddrs(ifaddr);
         time_t start_time = time(NULL);
         unsigned char buf[BUFFERSIZE];
+        char outputbuff[BUFFERSIZE];
 
         while (running)
         {
@@ -147,11 +154,11 @@ int main(void)
             FD_ZERO(&readfds);
 
             int maxfd = 0;
-            for (size_t i = 0; i < nbr_ifaces; i++) 
+            for (size_t i = 0; i < ctx.nbr_ifaces; i++) 
             {
-                FD_SET(ifaces[i].sock, &readfds);
-                if (ifaces[i].sock > maxfd)
-                    maxfd = ifaces[i].sock;
+                FD_SET(ctx.ifaces[i].sock, &readfds);
+                if (ctx.ifaces[i].sock > maxfd)
+                    maxfd = ctx.ifaces[i].sock;
             }
 
             FD_SET(sockfd_un, &readfds);
@@ -169,7 +176,7 @@ int main(void)
             // When the unix_socket is awake
             if (FD_ISSET(sockfd_un, &readfds))
             {
-                struct sockaddr_ll src_addr;
+                struct sockaddr_un src_addr;
                 socklen_t addrlen = sizeof(src_addr);
 
                 ssize_t len = recvfrom(sockfd_un, buf, sizeof(buf), 0, (struct sockaddr *)&src_addr, &addrlen);
@@ -178,19 +185,32 @@ int main(void)
                     putchar(buf[i]);
                 printf("]\n");
                 
-                // TODO :
+                command *cmd = parseCommand(buf, len);
+
+                printCommand(cmd);
+
+                if (!cmd)
+                    continue;
+
+
+                memset(outputbuff, 0, sizeof(outputbuff));
+                handleCommand(cmd, outputbuff);
+
+                sendto(sockfd_un, outputbuff, strlen(outputbuff) + 1, 0, (struct sockaddr *)&src_addr, addrlen);
+            
+                free(cmd);
             }
 
-            // find the awaik interface
-            for (size_t in = 0; in < nbr_ifaces; in++)
+            // find the awake interface
+            for (size_t in = 0; in < ctx.nbr_ifaces; in++)
             {
-                if (!FD_ISSET(ifaces[in].sock, &readfds))
+                if (!FD_ISSET(ctx.ifaces[in].sock, &readfds))
                     continue;
 
                 struct sockaddr_ll src_addr;
                 socklen_t addrlen = sizeof(src_addr);
 
-                ssize_t len = recvfrom(ifaces[in].sock, buf, sizeof(buf), 0, (struct sockaddr *)&src_addr, &addrlen);
+                ssize_t len = recvfrom(ctx.ifaces[in].sock, buf, sizeof(buf), 0, (struct sockaddr *)&src_addr, &addrlen);
                 if (len <= 0)
                     continue;
 
@@ -199,37 +219,37 @@ int main(void)
                 if (!f)
                     continue;
 
-                ifaces[in].rx_frames += 1;
-                ifaces[in].rx_bytes += len;
+                ctx.ifaces[in].rx_frames += 1;
+                ctx.ifaces[in].rx_bytes += len;
 
                 // learn
-                mac_table_learn(f->src, f->vlan_id, ifaces[in].ifindex);
+                mac_table_learn(f->src, f->vlan_id, ctx.ifaces[in].ifindex);
 
                 // lookup for destination
                 record *dst = mac_table_lookup(f->dst, f->vlan_id);
 
-                if (dst && dst->INTERFACE != ifaces[in].ifindex)
+                if (dst && dst->INTERFACE != ctx.ifaces[in].ifindex)
                 {
                     int out = dst->INTERFACE;
 
-                    sendto(ifaces[out].sock, buf, len, 0, (struct sockaddr *)&ifaces[out].addr,
-                        sizeof(ifaces[out].addr));
+                    sendto(ctx.ifaces[out].sock, buf, len, 0, (struct sockaddr *)&ctx.ifaces[out].addr,
+                        sizeof(ctx.ifaces[out].addr));
 
-                    ifaces[out].tx_frames += 1;
-                    ifaces[out].tx_bytes += len;
+                    ctx.ifaces[out].tx_frames += 1;
+                    ctx.ifaces[out].tx_bytes += len;
                 }
                 else
                 {
-                    for (size_t out = 0; out < nbr_ifaces; out++)
+                    for (size_t out = 0; out < ctx.nbr_ifaces; out++)
                     {
-                        if (ifaces[out].ifindex == ifaces[in].ifindex)
+                        if (ctx.ifaces[out].ifindex == ctx.ifaces[in].ifindex)
                             continue;
 
-                        sendto(ifaces[out].sock, buf, len, 0, (struct sockaddr *)&ifaces[out].addr,
-                            sizeof(ifaces[out].addr));
+                        sendto(ctx.ifaces[out].sock, buf, len, 0, (struct sockaddr *)&ctx.ifaces[out].addr,
+                            sizeof(ctx.ifaces[out].addr));
 
-                        ifaces[out].tx_frames += 1;
-                        ifaces[out].tx_bytes += len;
+                        ctx.ifaces[out].tx_frames += 1;
+                        ctx.ifaces[out].tx_bytes += len;
                     }
                 }
                 free(f);
