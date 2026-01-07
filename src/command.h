@@ -11,15 +11,26 @@ enum command_type
     /* GET IFACES
     {
         "ifaces:" ["if1", "if2", ...]
-    }        
+    }
     */
-    GET_TRAFIC,
-    /* GET TRAFIC
+    GET_DATA
+    /*
     {
-        "rx_frames": value,
-        "rx_bytes": value,
-        "tx_frames": value,
-        "tx_bytes": value
+        "ifaces" : [
+            {
+                "name" : ifname,
+                "rx_frames": value,
+                "rx_bytes": value,
+                "tx_frames": value,
+                "tx_bytes": value
+                "mac" : [
+                    {
+                        "address" : mac_address,
+                        "last_seen" : last_seen
+                    }
+                ]
+            }
+        ]
     }
     */
 };

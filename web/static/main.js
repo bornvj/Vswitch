@@ -31,7 +31,7 @@ async function initIfaces() {
                 state.open = !state.open;
                 details.style.display = state.open ? "block" : "none";
 
-                // Refresh immédiat à l’ouverture
+                // refresh at opening
                 if (state.open) {
                     refreshTraffic(ifaceName);
                 }
@@ -45,32 +45,31 @@ async function initIfaces() {
     }
 }
 
-async function refreshTraffic(ifaceName) {
+async function refreshTraffic() {
     try {
-        const res = await fetch(`/api/trafic/${ifaceName}`);
+        const res = await fetch("/api/data");
         const data = await res.json();
 
-        const details = ifaceState[ifaceName].detailsDiv;
-        if (!details) return;
+        for (const got_iface of data.ifaces) {
+            const state = ifaceState[got_iface.name];
+            if (!state || !state.open) continue;
 
-        details.textContent =
-            `Interface: ${ifaceName}
-            RX frames: ${data.rx_frames}
-            RX bytes:   ${data.rx_bytes}
-            TX frames: ${data.tx_frames}
-            TX bytes:   ${data.tx_bytes}`;
+            state.detailsDiv.textContent =
+                `Interface: ${got_iface.name}
+                RX frames: ${got_iface.rx_frames}
+                RX bytes:  ${got_iface.rx_bytes}
+                TX frames: ${got_iface.tx_frames}
+                TX bytes:  ${got_iface.tx_bytes}`;
+        }
+
     } catch (err) {
-        console.error(`Failed to refresh traffic for ${ifaceName}`, err);
+        console.error("Failed to refresh data", err);
     }
 }
 
 
 setInterval(() => {
-    for (const ifaceName in ifaceState) {
-        if (ifaceState[ifaceName].open) {
-            refreshTraffic(ifaceName);
-        }
-    }
+    refreshTraffic()
 }, 3000);
 
 initIfaces();

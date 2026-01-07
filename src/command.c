@@ -23,10 +23,9 @@ command *parseCommand(unsigned char *buf, size_t len)
         {
             ret->type = GET_IFACES;
         }
-        else if (strcmp(arg1, "TRAFIC") == 0)
+        else if (strcmp(arg1, "DATA") == 0)
         {
-            ret->type = GET_TRAFIC;
-            strcpy(ret->ifname, arg2);
+            ret->type = GET_DATA;
         } else
         {
             free(ret);
@@ -57,8 +56,8 @@ void printCommand(command *cmd)
         case GET_IFACES:
             printf("GET IFACES\n");
             break;
-        case GET_TRAFIC:
-            printf("GET TRAFIC %s\n", cmd->ifname);
+        case GET_DATA:
+            printf("GET DATA\n");
             break;
         default:
             printf("ERROR COMAND\n");
@@ -77,6 +76,7 @@ void handleCommand(command *cmd, char* outputBuf, switch_ctx ctx)
     switch (cmd->type)
     {
         case GET_IFACES:
+        {
             outputBuf[0] = '\0';
             strcat(outputBuf, "{\"ifaces\" : [");
 
@@ -96,24 +96,37 @@ void handleCommand(command *cmd, char* outputBuf, switch_ctx ctx)
 
             strcat(outputBuf, "]}");
             break;
-        case GET_TRAFIC:
-            for (size_t i = 0; i < ctx.nbr_ifaces; i++)
+        }
+        case GET_DATA:
+            outputBuf[0] = '\0';
+            char tem_string[1024] = {'\0'};
+            strcat(outputBuf, "{"); // start json
             {
-                if (strcmp(ctx.ifaces[i].ifname, cmd->ifname) == 0)
-                {   
-                    outputBuf[0] = '\0';
-                    sprintf(outputBuf, 
+                strcat(outputBuf, "\"ifaces\" : ["); // start ifaces
+                for (size_t i = 0; i < ctx.nbr_ifaces; i++)
+                {
+                    tem_string[0] = '\0';
+                    sprintf(tem_string, 
                         "{\
+                            \"name\": \"%s\", \
                             \"rx_frames\": \"%lu\", \
-                            \"rx_bytes\": \"%lu\", \
+                            \"rx_bytes\": \"%lu\",  \
                             \"tx_frames\": \"%lu\", \
-                            \"tx_bytes\": \"%lu\" \
-                        }", 
+                            \"tx_bytes\": \"%lu\",  \
+                            \"mac \" : [", 
+                        ctx.ifaces[i].ifname,
                         ctx.ifaces[i].rx_frames,
                         ctx.ifaces[i].rx_bytes,
                         ctx.ifaces[i].tx_frames,
                         ctx.ifaces[i].tx_bytes);
+                    strcat(outputBuf, tem_string);
+                    // TODO: ADD MAC
+                    strcat(outputBuf, "]}");
+                    if (i != ctx.nbr_ifaces - 1)
+                        strcat(outputBuf, ",");
                 }
+                strcat(outputBuf, "]"); // end ifaces
+            strcat(outputBuf, "}"); // start json
             }
             break;
         default:

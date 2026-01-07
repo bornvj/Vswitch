@@ -49,5 +49,10 @@ def iface_stats(ifname):
     raw = query_switch(f"GET TRAFIC {ifname}")
     return Response(raw, mimetype="application/json")
 
+@app.route("/api/data")
+def data():
+    raw = query_switch(f"GET DATA")
+    return Response(raw, mimetype="application/json")
+
 if __name__ == "__main__":
     app.run(host="127.0.0.1", port=8080, debug=True)
