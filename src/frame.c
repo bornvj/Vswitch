@@ -2,6 +2,7 @@
 
 #include "record.h"
 #include "frame.h"
+#include "tools.h"
 
 
 frame* parseFrame(const unsigned char* buf, size_t size)
@@ -90,6 +91,10 @@ void handleFrame(frame *f, switch_ctx *ctx, size_t in, ssize_t len, unsigned cha
 
     // learn
     mac_table_learn(ctx->mac_table, f->src, f->vlan_id, ctx->ifaces[in].ifindex);
+
+    // if the dest is the receiver iface
+    if (mac_equal(f->dst, ctx->ifaces[in].mac))
+        return;
 
     // lookup for destination
     record *dst = mac_table_lookup(ctx->mac_table, f->dst, f->vlan_id);

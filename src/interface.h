@@ -16,6 +16,7 @@ struct iface
     int sock;
     struct sockaddr_ll addr;
     char *ifname;
+    unsigned char mac[6];
 
     unsigned long rx_frames;    // received frames
     unsigned long rx_bytes;     // recieved bytes

@@ -54,12 +54,12 @@ async function refreshTraffic() {
             const state = ifaceState[got_iface.name];
             if (!state || !state.open) continue;
 
-            state.detailsDiv.textContent =
-                `Interface: ${got_iface.name}
+            state.detailsDiv.innerHTML =
+                `Interface: ${got_iface.name} <br/>
                 RX frames: ${got_iface.rx_frames}
                 RX bytes:  ${got_iface.rx_bytes}
                 TX frames: ${got_iface.tx_frames}
-                TX bytes:  ${got_iface.tx_bytes}`;
+                TX bytes:  ${got_iface.tx_bytes} <br/>` + 'test';
         }
 
     } catch (err) {

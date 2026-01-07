@@ -59,7 +59,8 @@ int main(void)
 
     // Init the switch context
     switch_ctx ctx;
-    memset(&ctx, 0, MAX_IFACES * sizeof(struct iface));
+    memset(ctx.ifaces, 0, sizeof(ctx.ifaces));
+    memset(ctx.mac_table, 0, sizeof(struct bucket*));
     ctx.nbr_ifaces = 0;
 
     
@@ -105,11 +106,11 @@ int main(void)
 
         for (struct ifaddrs *ifa = ifaddr; ifa != NULL; ifa = ifa->ifa_next) 
         {
+            if (ctx.nbr_ifaces >= MAX_IFACES)
+                break;
+
             if (ifa->ifa_addr == NULL || ifa->ifa_addr->sa_family != AF_PACKET)
                 continue;
-
-
-            printf("%-8s\n", ifa->ifa_name);
 
             int sock = socket(AF_PACKET, SOCK_RAW, htons(ETH_P_ALL));
             if (sock < 0) 
@@ -129,7 +130,14 @@ int main(void)
                 perror("bind");
                 exit(1);
             }
+
             
+            
+            struct sockaddr_ll *sll = (struct sockaddr_ll *)ifa->ifa_addr;
+
+            if (sll->sll_halen == ETH_ALEN)
+                memcpy(ctx.ifaces[ctx.nbr_ifaces].mac, sll->sll_addr, ETH_ALEN);
+
             ctx.ifaces[ctx.nbr_ifaces].ifindex      = addr.sll_ifindex;
             ctx.ifaces[ctx.nbr_ifaces].sock         = sock;
             ctx.ifaces[ctx.nbr_ifaces].addr         = addr;
@@ -141,6 +149,13 @@ int main(void)
             ctx.ifaces[ctx.nbr_ifaces].tx_bytes     = 0;
 
             ctx.nbr_ifaces++;
+        }
+
+        printf("running with these interfaces:\n");
+        for (size_t i = 0; i < ctx.nbr_ifaces; i++)
+        {
+            printf("\t%-8s - %02x:%02x:%02x:%02x:%02x:%02x\n", ctx.ifaces[i].ifname,
+                ctx.ifaces[i].mac[0],ctx.ifaces[i].mac[1],ctx.ifaces[i].mac[2],ctx.ifaces[i].mac[3],ctx.ifaces[i].mac[4],ctx.ifaces[i].mac[5]);
         }
 
         freeifaddrs(ifaddr);
