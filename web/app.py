@@ -44,11 +44,6 @@ def ifaces():
     raw = query_switch("GET IFACES")
     return Response(raw, mimetype="application/json")
 
-@app.route("/api/trafic/<ifname>")
-def iface_stats(ifname):
-    raw = query_switch(f"GET TRAFIC {ifname}")
-    return Response(raw, mimetype="application/json")
-
 @app.route("/api/data")
 def data():
     raw = query_switch(f"GET DATA")
