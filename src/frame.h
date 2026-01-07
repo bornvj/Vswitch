@@ -13,6 +13,8 @@
 #include <arpa/inet.h>
 #include <string.h>
 
+#include "switch_ctx.h"
+
 enum EtherType
 {
     IPV4        = 0x0800,
@@ -44,5 +46,7 @@ typedef struct frame
 frame *parseFrame(const unsigned char* buf, size_t size);
 
 void printFrame(frame *f);
+
+void handleFrame(frame *f, switch_ctx *ctx, size_t in, ssize_t len, unsigned char *buf);
 
 #endif

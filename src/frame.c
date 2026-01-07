@@ -1,5 +1,6 @@
 #include <malloc.h>
 
+#include "record.h"
 #include "frame.h"
 
 
@@ -80,4 +81,41 @@ void printFrame (frame *f)
 
     printf("] payloadSize[%lu]\n",f->payload_size);
     // TODO: implements VLAN print
+}
+
+void handleFrame(frame *f, switch_ctx *ctx, size_t in, ssize_t len, unsigned char *buf)
+{
+    ctx->ifaces[in].rx_frames += 1;
+    ctx->ifaces[in].rx_bytes += len;
+
+    // learn
+    mac_table_learn(f->src, f->vlan_id, ctx->ifaces[in].ifindex);
+
+    // lookup for destination
+    record *dst = mac_table_lookup(f->dst, f->vlan_id);
+
+    if (dst && dst->INTERFACE != ctx->ifaces[in].ifindex)
+    {
+        int out = dst->INTERFACE;
+
+        sendto(ctx->ifaces[out].sock, buf, len, 0, (struct sockaddr *)&ctx->ifaces[out].addr,
+            sizeof(ctx->ifaces[out].addr));
+
+        ctx->ifaces[out].rx_frames += 1;
+        ctx->ifaces[out].rx_bytes += len;
+    }
+    else
+    {
+        for (size_t out = 0; out < ctx->nbr_ifaces; out++)
+        {
+            if (ctx->ifaces[out].ifindex == ctx->ifaces[in].ifindex)
+                continue;
+
+            sendto(ctx->ifaces[out].sock, buf, len, 0, (struct sockaddr *)&ctx->ifaces[out].addr,
+                sizeof(ctx->ifaces[out].addr));
+
+            ctx->ifaces[out].tx_frames += 1;
+            ctx->ifaces[out].tx_bytes += len;
+        }
+    }
 }

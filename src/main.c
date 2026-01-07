@@ -29,8 +29,8 @@ volatile sig_atomic_t running = 1;
 pid_t web_pid = -1;
 
 
-#define BUFFERSIZE 1600
-#define OUTPUT_BUFFERSIZE 1600
+#define INPUT_BUFFERSIZE (1600)
+#define OUTPUT_BUFFERSIZE (1600)
 
 
 void handle_signal(int sig)
@@ -147,8 +147,8 @@ int main(void)
 
         ctx.start_time = time(NULL);
 
-        unsigned char buf[BUFFERSIZE];
-        char outputbuff[BUFFERSIZE];
+        unsigned char buf[INPUT_BUFFERSIZE];
+        char outputbuff[OUTPUT_BUFFERSIZE];
 
         while (running)
         {
@@ -183,7 +183,7 @@ int main(void)
 
                 ssize_t len = recvfrom(sockfd_un, buf, sizeof(buf), 0, (struct sockaddr *)&src_addr, &addrlen);
                 
-                if (len >= 0 && len < BUFFERSIZE)
+                if (len >= 0 && len < INPUT_BUFFERSIZE)
                     buf[len] = '\0';
                 
                 command *cmd = parseCommand(buf, len);
@@ -220,39 +220,8 @@ int main(void)
                 if (!f)
                     continue;
 
-                ctx.ifaces[in].rx_frames += 1;
-                ctx.ifaces[in].rx_bytes += len;
+                handleFrame(f, &ctx, in, len, buf);
 
-                // learn
-                mac_table_learn(f->src, f->vlan_id, ctx.ifaces[in].ifindex);
-
-                // lookup for destination
-                record *dst = mac_table_lookup(f->dst, f->vlan_id);
-
-                if (dst && dst->INTERFACE != ctx.ifaces[in].ifindex)
-                {
-                    int out = dst->INTERFACE;
-
-                    sendto(ctx.ifaces[out].sock, buf, len, 0, (struct sockaddr *)&ctx.ifaces[out].addr,
-                        sizeof(ctx.ifaces[out].addr));
-
-                    ctx.ifaces[out].tx_frames += 1;
-                    ctx.ifaces[out].tx_bytes += len;
-                }
-                else
-                {
-                    for (size_t out = 0; out < ctx.nbr_ifaces; out++)
-                    {
-                        if (ctx.ifaces[out].ifindex == ctx.ifaces[in].ifindex)
-                            continue;
-
-                        sendto(ctx.ifaces[out].sock, buf, len, 0, (struct sockaddr *)&ctx.ifaces[out].addr,
-                            sizeof(ctx.ifaces[out].addr));
-
-                        ctx.ifaces[out].tx_frames += 1;
-                        ctx.ifaces[out].tx_bytes += len;
-                    }
-                }
                 free(f);
             }
             mac_table_age(time(NULL));
