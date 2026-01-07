@@ -65,7 +65,7 @@ void printCommand(command *cmd)
     }
 }
 
-void handleCommand(command *cmd, char* outputBuf, switch_ctx ctx)
+void handleCommand(command *cmd, char* outputBuf, switch_ctx ctx, time_t now)
 {
     if (!cmd)
     {
@@ -120,7 +120,28 @@ void handleCommand(command *cmd, char* outputBuf, switch_ctx ctx)
                         ctx.ifaces[i].tx_frames,
                         ctx.ifaces[i].tx_bytes);
                     strcat(outputBuf, tem_string);
-                    // TODO: ADD MAC
+                    
+                    int first_mac = 1;
+                    for (size_t i = 0; i < sizeof(ctx.mac_table) / sizeof(bucket*); i++)
+                    {
+                        bucket *cur = ctx.mac_table[i];
+                        while (cur)
+                        {
+                            if (cur->rec->INTERFACE == i)
+                            {
+                                if (first_mac)
+                                    first_mac = 0;
+                                else
+                                    strcat(outputBuf, ",");
+                                tem_string[0] = '\0';
+                                sprintf(tem_string, "{\"address\" : %02x:%02x:%02x:%02x:%02x:%02x, \"last_seen\" : %lu}",
+                                cur->rec->MAC[0],cur->rec->MAC[1],cur->rec->MAC[2],cur->rec->MAC[3],cur->rec->MAC[4],cur->rec->MAC[5], now - cur->rec->last_seen);
+                                strcat(outputBuf, tem_string);
+                            }
+                            cur = cur->next;
+                        }
+                    }
+
                     strcat(outputBuf, "]}");
                     if (i != ctx.nbr_ifaces - 1)
                         strcat(outputBuf, ",");

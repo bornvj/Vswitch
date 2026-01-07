@@ -2,6 +2,7 @@
 #define COMMAND_H
 
 #include <stdlib.h>
+#include <time.h>
 #include "switch_ctx.h"
 
 enum command_type
@@ -43,6 +44,6 @@ typedef struct command
 
 command *parseCommand(unsigned char *buf, size_t len);
 void printCommand(command *cmd);
-void handleCommand(command *cmd, char* outputBuf, switch_ctx ctx);
+void handleCommand(command *cmd, char* outputBuf, switch_ctx ctx, time_t now);
 
 #endif

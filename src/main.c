@@ -170,6 +170,8 @@ int main(void)
             fd_set readfds;
             FD_ZERO(&readfds);
 
+            time_t now = time(NULL);
+
             int maxfd = 0;
             for (size_t i = 0; i < ctx.nbr_ifaces; i++) 
             {
@@ -210,7 +212,7 @@ int main(void)
 
 
                 memset(outputbuff, 0, sizeof(outputbuff));
-                handleCommand(cmd, outputbuff, ctx);
+                handleCommand(cmd, outputbuff, ctx, now);
 
                 sendto(sockfd_un, outputbuff, strlen(outputbuff), 0, (struct sockaddr *)&src_addr, addrlen);
             
@@ -239,10 +241,10 @@ int main(void)
 
                 free(f);
             }
-            mac_table_age(ctx.mac_table, time(NULL));
+            mac_table_age(ctx.mac_table, now);
 
             // UNCOMMENT THIS LINE TO PRINT MAC TABLE
-            // print_mac_table(ctx.ifaces, ctx.nbr_ifaces, ctx.start_time);
+            print_mac_table(ctx.mac_table, ctx.ifaces, ctx.nbr_ifaces, ctx.start_time);
         }
 
         if (web_pid > 0)

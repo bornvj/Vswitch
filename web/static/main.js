@@ -60,6 +60,8 @@ async function refreshTraffic() {
                 RX bytes:  ${got_iface.rx_bytes}
                 TX frames: ${got_iface.tx_frames}
                 TX bytes:  ${got_iface.tx_bytes} <br/>` + 'test';
+
+            console.log(got_iface);
         }
 
     } catch (err) {
