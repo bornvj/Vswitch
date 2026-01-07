@@ -13,8 +13,7 @@ typedef struct
     size_t nbr_ifaces;
 
     // MAC table
-    record *mac_table;
-    size_t mac_table_size;
+    bucket *mac_table[BUCKETS_SIZE];
 
     // metadata
     time_t start_time;

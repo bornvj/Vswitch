@@ -89,10 +89,10 @@ void handleFrame(frame *f, switch_ctx *ctx, size_t in, ssize_t len, unsigned cha
     ctx->ifaces[in].rx_bytes += len;
 
     // learn
-    mac_table_learn(f->src, f->vlan_id, ctx->ifaces[in].ifindex);
+    mac_table_learn(ctx->mac_table, f->src, f->vlan_id, ctx->ifaces[in].ifindex);
 
     // lookup for destination
-    record *dst = mac_table_lookup(f->dst, f->vlan_id);
+    record *dst = mac_table_lookup(ctx->mac_table, f->dst, f->vlan_id);
 
     if (dst && dst->INTERFACE != ctx->ifaces[in].ifindex)
     {

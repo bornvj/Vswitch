@@ -2,8 +2,6 @@
 #include "record.h"
 #include "tools.h"
 
-bucket *mac_table[BUCKETS_SIZE] = {0};
-
 bucket* bucket_init(record *rec)
 {
     if (!rec)
@@ -34,7 +32,7 @@ record* initRec(const unsigned char MAC[6], uint16_t VLAN, size_t INTERFACE)
     return rec;
 }
     
-record *mac_table_lookup(const unsigned char MAC[6], uint16_t VLAN_ID)
+record *mac_table_lookup(bucket *mac_table[BUCKETS_SIZE], const unsigned char MAC[6], uint16_t VLAN_ID)
 {
     uint8_t key = hash(MAC, VLAN_ID);
 
@@ -50,7 +48,7 @@ record *mac_table_lookup(const unsigned char MAC[6], uint16_t VLAN_ID)
     return NULL;
 }
 
-void mac_table_learn(const unsigned char MAC[6], uint16_t VLAN_ID, size_t INTERFACE)
+void mac_table_learn(bucket *mac_table[BUCKETS_SIZE], const unsigned char MAC[6], uint16_t VLAN_ID, size_t INTERFACE)
 {
     uint8_t key = hash(MAC, VLAN_ID);
 
@@ -100,7 +98,7 @@ void mac_table_age_aux(bucket *b, time_t now)
     mac_table_age_aux(b->next, now);
 }
 
-void mac_table_age(time_t now)
+void mac_table_age(bucket *mac_table[BUCKETS_SIZE], time_t now)
 {
     for (size_t i = 0; i < BUCKETS_SIZE; i++)
     {
@@ -129,7 +127,7 @@ void mac_table_free_aux(bucket *b)
     bucket_free(b);
 }
 
-void mac_table_free()
+void mac_table_free(bucket *mac_table[BUCKETS_SIZE])
 {
     for (size_t i = 0; i < BUCKETS_SIZE; i++)
         mac_table_free_aux(mac_table[i]);

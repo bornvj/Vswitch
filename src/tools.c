@@ -16,7 +16,7 @@ int mac_equal(const unsigned char MAC1[6], const unsigned char MAC2[6])
     return !memcmp(MAC1, MAC2, 6);
 }
 
-void print_mac_table(struct iface *ifaces, size_t iface_nbr, time_t start_time)
+void print_mac_table(bucket *mac_table[BUCKETS_SIZE], struct iface *ifaces, size_t iface_nbr, time_t start_time)
 {
     printf("\033[H\033[J");
     bucket *b;

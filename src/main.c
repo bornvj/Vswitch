@@ -224,7 +224,7 @@ int main(void)
 
                 free(f);
             }
-            mac_table_age(time(NULL));
+            mac_table_age(ctx.mac_table, time(NULL));
 
             // UNCOMMENT THIS LINE TO PRINT MAC TABLE
             // print_mac_table(ctx.ifaces, ctx.nbr_ifaces, ctx.start_time);
