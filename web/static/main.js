@@ -50,18 +50,23 @@ async function refreshTraffic() {
         const res = await fetch("/api/data");
         const data = await res.json();
 
+        //console.log(data);
+
         for (const got_iface of data.ifaces) {
+
             const state = ifaceState[got_iface.name];
             if (!state || !state.open) continue;
+
+            macs = "";
+            for (mac of got_iface.mac)
+                macs += `[${mac.address}] + last seen: ${mac.last_seen} <br/>`;
 
             state.detailsDiv.innerHTML =
                 `Interface: ${got_iface.name} <br/>
                 RX frames: ${got_iface.rx_frames}
                 RX bytes:  ${got_iface.rx_bytes}
                 TX frames: ${got_iface.tx_frames}
-                TX bytes:  ${got_iface.tx_bytes} <br/>` + 'test';
-
-            console.log(got_iface);
+                TX bytes:  ${got_iface.tx_bytes} <br/> ` + macs;
         }
 
     } catch (err) {
@@ -72,6 +77,6 @@ async function refreshTraffic() {
 
 setInterval(() => {
     refreshTraffic()
-}, 3000);
+}, 500);
 
 initIfaces();

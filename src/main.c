@@ -244,7 +244,7 @@ int main(void)
             mac_table_age(ctx.mac_table, now);
 
             // UNCOMMENT THIS LINE TO PRINT MAC TABLE
-            print_mac_table(ctx.mac_table, ctx.ifaces, ctx.nbr_ifaces, ctx.start_time);
+            // print_mac_table(ctx.mac_table, ctx.ifaces, ctx.nbr_ifaces, ctx.start_time);
         }
 
         if (web_pid > 0)
