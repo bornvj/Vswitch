@@ -130,23 +130,22 @@ int main(void)
                 perror("bind");
                 exit(1);
             }
-
-            
             
             struct sockaddr_ll *sll = (struct sockaddr_ll *)ifa->ifa_addr;
 
             if (sll->sll_halen == ETH_ALEN)
                 memcpy(ctx.ifaces[ctx.nbr_ifaces].mac, sll->sll_addr, ETH_ALEN);
 
-            ctx.ifaces[ctx.nbr_ifaces].ifindex      = addr.sll_ifindex;
-            ctx.ifaces[ctx.nbr_ifaces].sock         = sock;
-            ctx.ifaces[ctx.nbr_ifaces].addr         = addr;
-            ctx.ifaces[ctx.nbr_ifaces].ifname       = strdup(ifa->ifa_name);
+            ctx.ifaces[ctx.nbr_ifaces].context_index    = ctx.nbr_ifaces;
+            ctx.ifaces[ctx.nbr_ifaces].ifindex          = addr.sll_ifindex;
+            ctx.ifaces[ctx.nbr_ifaces].sock             = sock;
+            ctx.ifaces[ctx.nbr_ifaces].addr             = addr;
+            ctx.ifaces[ctx.nbr_ifaces].ifname           = strdup(ifa->ifa_name);
 
-            ctx.ifaces[ctx.nbr_ifaces].rx_frames    = 0;
-            ctx.ifaces[ctx.nbr_ifaces].rx_bytes     = 0;
-            ctx.ifaces[ctx.nbr_ifaces].tx_frames    = 0;
-            ctx.ifaces[ctx.nbr_ifaces].tx_bytes     = 0;
+            ctx.ifaces[ctx.nbr_ifaces].rx_frames        = 0;
+            ctx.ifaces[ctx.nbr_ifaces].rx_bytes         = 0;
+            ctx.ifaces[ctx.nbr_ifaces].tx_frames        = 0;
+            ctx.ifaces[ctx.nbr_ifaces].tx_bytes         = 0;
 
             ctx.nbr_ifaces++;
         }
@@ -220,15 +219,15 @@ int main(void)
             }
 
             // find the awake interface
-            for (size_t in = 0; in < ctx.nbr_ifaces; in++)
+            for (size_t in_if_index = 0; in_if_index < ctx.nbr_ifaces; in_if_index++)
             {
-                if (!FD_ISSET(ctx.ifaces[in].sock, &readfds))
+                if (!FD_ISSET(ctx.ifaces[in_if_index].sock, &readfds))
                     continue;
 
                 struct sockaddr_ll src_addr;
                 socklen_t addrlen = sizeof(src_addr);
 
-                ssize_t len = recvfrom(ctx.ifaces[in].sock, buf, sizeof(buf), 0, (struct sockaddr *)&src_addr, &addrlen);
+                ssize_t len = recvfrom(ctx.ifaces[in_if_index].sock, buf, sizeof(buf), 0, (struct sockaddr *)&src_addr, &addrlen);
                 if (len <= 0)
                     continue;
 
@@ -237,7 +236,7 @@ int main(void)
                 if (!f)
                     continue;
 
-                handleFrame(f, &ctx, in, len, buf);
+                handleFrame(f, &ctx, in_if_index, len, buf);
 
                 free(f);
             }

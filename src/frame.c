@@ -90,30 +90,31 @@ void handleFrame(frame *f, switch_ctx *ctx, size_t in, ssize_t len, unsigned cha
     ctx->ifaces[in].rx_bytes += len;
 
     // learn
-    mac_table_learn(ctx->mac_table, f->src, f->vlan_id, ctx->ifaces[in].ifindex);
+    mac_table_learn(ctx->mac_table, f->src, f->vlan_id, ctx->ifaces[in].context_index);
 
     // if the dest is the receiver iface
-    if (mac_equal(f->dst, ctx->ifaces[in].mac))
+    if (mac_equal(f->dst, ctx->ifaces[in].mac) || memcmp(f->dst, "\0\0\0\0\0\0", 6) == 0) // do not handle broadcast and packet for the switch himself
         return;
 
     // lookup for destination
     record *dst = mac_table_lookup(ctx->mac_table, f->dst, f->vlan_id);
 
-    if (dst && dst->INTERFACE != ctx->ifaces[in].ifindex)
+    
+    if (dst && dst->INTERFACE != ctx->ifaces[in].context_index) // if the dst is known
     {
         int out = dst->INTERFACE;
 
         sendto(ctx->ifaces[out].sock, buf, len, 0, (struct sockaddr *)&ctx->ifaces[out].addr,
             sizeof(ctx->ifaces[out].addr));
 
-        ctx->ifaces[out].rx_frames += 1;
-        ctx->ifaces[out].rx_bytes += len;
+        ctx->ifaces[out].tx_frames += 1;
+        ctx->ifaces[out].tx_bytes += len;
     }
-    else
+    else // flood
     {
         for (size_t out = 0; out < ctx->nbr_ifaces; out++)
         {
-            if (ctx->ifaces[out].ifindex == ctx->ifaces[in].ifindex)
+            if (ctx->ifaces[out].context_index == ctx->ifaces[in].context_index)
                 continue;
 
             sendto(ctx->ifaces[out].sock, buf, len, 0, (struct sockaddr *)&ctx->ifaces[out].addr,
