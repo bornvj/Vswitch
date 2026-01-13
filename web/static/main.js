@@ -58,6 +58,7 @@ async function refreshTraffic() {
             if (!state || !state.open) continue;
 
             macs = "";
+            got_iface.mac.sort((a, b) => a.last_seen - b.last_seen);
             for (mac of got_iface.mac)
                 macs += `[${mac.address}] + last seen: ${mac.last_seen} <br/>`;
 

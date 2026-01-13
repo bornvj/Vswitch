@@ -112,6 +112,9 @@ int main(void)
             if (ifa->ifa_addr == NULL || ifa->ifa_addr->sa_family != AF_PACKET)
                 continue;
 
+            if (strcmp(ifa->ifa_name, "lo") == 0)
+                continue;
+
             int sock = socket(AF_PACKET, SOCK_RAW, htons(ETH_P_ALL));
             if (sock < 0) 
             {
@@ -216,6 +219,7 @@ int main(void)
                 sendto(sockfd_un, outputbuff, strlen(outputbuff), 0, (struct sockaddr *)&src_addr, addrlen);
             
                 free(cmd);
+                continue;
             }
 
             // find the awake interface
