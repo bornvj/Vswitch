@@ -1,41 +1,94 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>VSwitch Monitor</title>
+
     <style>
-        body { background: #111; color: #0f0; font-family: monospace; }
+        :root {
+            --bg: #0b0f14;
+            --panel: #111822;
+            --border: #1f2a38;
+            --green: #3cff00;
+            --muted: #6a7a90;
+        }
+
+        body {
+            background: var(--bg);
+            color: var(--green);
+            font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+            margin: 0;
+            padding: 20px;
+        }
+
+        h1 {
+            margin-bottom: 20px;
+        }
+
+        .panel {
+            background: var(--panel);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: 10px;
+        }
 
         .iface {
+            padding: 8px 10px;
+            margin: 6px 0;
+            border: 1px solid var(--border);
+            border-radius: 4px;
             cursor: pointer;
-            padding: 5px;
-            border: 1px solid #0f0;
-            margin: 5px 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
 
         .iface:hover {
-            background: #022;
+            background: #162030;
+        }
+
+        .iface.open {
+            background: #162030;
+            border-color: var(--green);
         }
 
         .details {
-            margin-left: 20px;
-            padding: 5px;
-            border-left: 2px solid #0f0;
+            margin: 5px 0 10px 20px;
+            padding-left: 10px;
+            border-left: 2px solid var(--border);
+            color: #c6ffb3;
+            font-size: 13px;
             display: none;
         }
+
+        .stat {
+            display: grid;
+            grid-template-columns: auto auto;
+            gap: 4px 12px;
+            margin-bottom: 8px;
+        }
+
+        .mac {
+            color: var(--muted);
+        }
+
+        footer {
+            margin-top: 15px;
+            font-size: 12px;
+            color: var(--muted);
+        }
     </style>
+</head>
 
-    <head>
-        <meta charset="utf-8">
-        <title>VSwitch Monitor</title>
-        <style>
-            body { background: #111; color: #0f0; font-family: monospace; }
-            pre { font-size: 14px; }
-        </style>
-    </head>
-    <body>
-        <h1>VSwitch status</h1>
-        <div id="ifaces">loading...</div>
+<body>
+    <h1>VSwitch status</h1>
 
-        <script src="/static/main.js"></script>
-    </body>
+    <div id="ifaces" class="panel">
+        loading...
+    </div>
 
-    
+    <footer>refresh every 500ms</footer>
+
+    <script src="/static/main.js"></script>
+</body>
 </html>
